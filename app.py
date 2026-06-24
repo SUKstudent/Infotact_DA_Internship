@@ -1,368 +1,189 @@
+# Deployment link : https://multitouchattribution.streamlit.app/
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# --------------------------------------------------
+# ---------------- CONFIG ----------------
+st.set_page_config(page_title="MTA Dashboard", layout="wide")
+st.title("📊 Multi-Touch Attribution Dashboard")
 
-# PAGE CONFIG
-
-# --------------------------------------------------
-
-st.set_page_config(
-page_title="Marketing Attribution Analytics",
-layout="wide",
-page_icon="📈"
-)
-
-st.title("📈 Marketing Attribution Analytics Dashboard")
-st.markdown("Analyze customer journeys, campaign performance, and channel effectiveness.")
-
-# --------------------------------------------------
-
-# LOAD DATA
-
-# --------------------------------------------------
-
+# ---------------- LOAD DATA ----------------
 @st.cache_data
 def load_data():
-df = pd.read_csv("multi_touch_attribution_dataset_cleaned.csv")
-
-```
-# Clean column names
-df.columns = df.columns.str.strip()
-
-# Convert date columns
-if "event_date" in df.columns:
+    df = pd.read_csv("multi_touch_attribution_dataset_cleaned.csv")
+    df["event_timestamp_utc"] = pd.to_datetime(df["event_timestamp_utc"], errors="coerce")
     df["event_date"] = pd.to_datetime(df["event_date"], errors="coerce")
-
-if "event_timestamp_utc" in df.columns:
-    df["event_timestamp_utc"] = pd.to_datetime(
-        df["event_timestamp_utc"],
-        errors="coerce"
-    )
-
-return df
-```
+    return df
 
 df = load_data()
 
-# --------------------------------------------------
+# ---------------- SIDEBAR ----------------
+st.sidebar.title("🎛 Filters")
 
-# SIDEBAR
-
-# --------------------------------------------------
-
-st.sidebar.header("Dashboard Controls")
-
-section = st.sidebar.selectbox(
-"Choose Section",
-[
-"Executive Summary",
-"Channel Insights",
-"Campaign Performance",
-"Customer Journey",
-"Audience Analysis",
-"Recommendations"
-]
+page = st.sidebar.radio(
+    "Navigate",
+    [
+        "Overview",
+        "Channel Analysis",
+        "Funnel Analysis",
+        "Campaign Analysis",
+        "Device & Region",
+        "Touchpoint Analysis",
+        "Insights"
+    ]
 )
 
-if "channel" in df.columns:
+channels = df["channel"].unique().tolist()
+
 selected_channels = st.sidebar.multiselect(
-"Select Channels",
-options=sorted(df["channel"].dropna().unique()),
-default=sorted(df["channel"].dropna().unique())
+    "🎯 Select Channels",
+    options=channels,
+    default=channels
 )
 
-```
 df = df[df["channel"].isin(selected_channels)]
-```
 
-# --------------------------------------------------
+st.sidebar.info("Multi-Touch Attribution System")
 
-# CUSTOM STYLING
+# =========================================================
+# OVERVIEW
+# =========================================================
+if page == "Overview":
 
-# --------------------------------------------------
+    st.subheader("📌 KPI Overview")
 
-st.markdown("""
+    col1, col2, col3, col4 = st.columns(4)
 
-<style>
-[data-testid="metric-container"] {
-    background: #f7f9fc;
-    border-radius: 12px;
-    padding: 12px;
-    border: 1px solid #e6eaf0;
-}
-</style>
+    col1.metric("Events", len(df))
+    col2.metric("Journeys", df["journey_id"].nunique())
+    col3.metric("Conversions", int(df["is_conversion"].sum()))
+    col4.metric("Revenue", f"${df['conversion_value'].sum():,.2f}")
 
-""", unsafe_allow_html=True)
+    st.divider()
 
-# --------------------------------------------------
+    # Trend Over Time
+    st.subheader("📈 Revenue Trend Over Time")
 
-# EXECUTIVE SUMMARY
+    trend = df.groupby("event_date")["conversion_value"].sum().reset_index()
 
-# --------------------------------------------------
-
-if section == "Executive Summary":
-
-```
-st.subheader("Business Overview")
-
-total_revenue = (
-    df["conversion_value"].sum()
-    if "conversion_value" in df.columns else 0
-)
-
-total_events = len(df)
-
-total_journeys = (
-    df["journey_id"].nunique()
-    if "journey_id" in df.columns else 0
-)
-
-total_conversions = (
-    int(df["is_conversion"].sum())
-    if "is_conversion" in df.columns else 0
-)
-
-c1, c2, c3, c4 = st.columns(4)
-
-c1.metric("Revenue", f"${total_revenue:,.0f}")
-c2.metric("Events", total_events)
-c3.metric("Journeys", total_journeys)
-c4.metric("Conversions", total_conversions)
-
-st.markdown("---")
-
-if "event_date" in df.columns and "conversion_value" in df.columns:
-
-    revenue_trend = (
-        df.groupby("event_date")["conversion_value"]
-        .sum()
-        .reset_index()
-    )
-
-    fig = px.area(
-        revenue_trend,
-        x="event_date",
-        y="conversion_value",
-        title="Revenue Trend"
-    )
-
-    st.plotly_chart(fig, use_container_width=True)
-```
-
-# --------------------------------------------------
-
-# CHANNEL INSIGHTS
-
-# --------------------------------------------------
-
-elif section == "Channel Insights":
-
-```
-st.subheader("Channel Effectiveness")
-
-channel_perf = (
-    df.groupby("channel")
-    .agg(
-        Revenue=("conversion_value", "sum"),
-        Conversions=("is_conversion", "sum"),
-        Events=("event_id", "count")
-    )
-    .reset_index()
-)
-
-left, right = st.columns(2)
-
-with left:
-    fig = px.bar(
-        channel_perf,
-        x="channel",
-        y="Revenue",
-        color="channel",
-        title="Revenue by Channel"
-    )
+    fig = px.line(trend, x="event_date", y="conversion_value", markers=True)
     st.plotly_chart(fig, use_container_width=True)
 
-with right:
-    fig = px.pie(
-        channel_perf,
-        names="channel",
-        values="Revenue",
-        title="Revenue Share"
-    )
-    st.plotly_chart(fig, use_container_width=True)
-```
+# =========================================================
+# CHANNEL ANALYSIS (VARIOUS CHARTS)
+# =========================================================
+elif page == "Channel Analysis":
 
-# --------------------------------------------------
+    st.subheader("📡 Channel Performance")
 
-# CAMPAIGN PERFORMANCE
+    ch = df.groupby("channel").agg(
+        revenue=("conversion_value", "sum"),
+        conversions=("is_conversion", "sum"),
+        events=("event_id", "count")
+    ).reset_index()
 
-# --------------------------------------------------
+    col1, col2 = st.columns(2)
 
-elif section == "Campaign Performance":
+    # LINE CHART
+    with col1:
+        fig1 = px.line(ch, x="channel", y="revenue", markers=True, title="Revenue by Channel")
+        st.plotly_chart(fig1, use_container_width=True)
 
-```
-if "campaign" in df.columns:
+    # BAR CHART
+    with col2:
+        fig2 = px.bar(ch, x="channel", y="conversions", color="channel", title="Conversions by Channel")
+        st.plotly_chart(fig2, use_container_width=True)
 
-    campaign_data = (
-        df.groupby("campaign")
-        .agg(
-            Revenue=("conversion_value", "sum"),
-            Events=("event_id", "count")
-        )
-        .reset_index()
-        .sort_values("Revenue", ascending=False)
-    )
+    # PIE CHART
+    st.subheader("📊 Revenue Share")
+    fig3 = px.pie(ch, names="channel", values="revenue")
+    st.plotly_chart(fig3, use_container_width=True)
 
-    fig = px.bar(
-        campaign_data,
-        x="campaign",
-        y="Revenue",
-        color="Revenue",
-        title="Campaign Revenue Ranking"
-    )
+# =========================================================
+# FUNNEL ANALYSIS
+# =========================================================
+elif page == "Funnel Analysis":
 
-    st.plotly_chart(fig, use_container_width=True)
-```
+    st.subheader("🎯 Funnel Breakdown")
 
-# --------------------------------------------------
+    funnel = df.groupby("funnel_stage").agg(
+        events=("event_id", "count"),
+        conversions=("is_conversion", "sum")
+    ).reset_index()
 
-# CUSTOMER JOURNEY
+    col1, col2 = st.columns(2)
 
-# --------------------------------------------------
+    with col1:
+        fig1 = px.bar(funnel, x="funnel_stage", y="events", color="funnel_stage")
+        st.plotly_chart(fig1, use_container_width=True)
 
-elif section == "Customer Journey":
+    with col2:
+        fig2 = px.line(funnel, x="funnel_stage", y="conversions", markers=True)
+        st.plotly_chart(fig2, use_container_width=True)
 
-```
-st.subheader("Journey Analysis")
+# =========================================================
+# CAMPAIGN ANALYSIS
+# =========================================================
+elif page == "Campaign Analysis":
 
-if "touchpoint_number" in df.columns:
+    st.subheader("📢 Campaign Performance")
 
-    touchpoints = (
-        df.groupby("touchpoint_number")
-        .size()
-        .reset_index(name="Count")
-    )
+    camp = df.groupby("campaign").agg(
+        revenue=("conversion_value", "sum"),
+        events=("event_id", "count")
+    ).reset_index().sort_values("revenue", ascending=False)
 
-    fig = px.line(
-        touchpoints,
-        x="touchpoint_number",
-        y="Count",
-        markers=True,
-        title="Touchpoint Distribution"
-    )
+    fig1 = px.bar(camp, x="campaign", y="revenue", color="campaign")
+    st.plotly_chart(fig1, use_container_width=True)
 
-    st.plotly_chart(fig, use_container_width=True)
+    fig2 = px.line(camp, x="campaign", y="events", markers=True)
+    st.plotly_chart(fig2, use_container_width=True)
 
-if "funnel_stage" in df.columns:
+# =========================================================
+# DEVICE & REGION
+# =========================================================
+elif page == "Device & Region":
 
-    funnel = (
-        df.groupby("funnel_stage")
-        .size()
-        .reset_index(name="Events")
-    )
+    col1, col2 = st.columns(2)
 
-    fig = px.bar(
-        funnel,
-        x="funnel_stage",
-        y="Events",
-        color="funnel_stage",
-        title="Funnel Stage Distribution"
-    )
-
-    st.plotly_chart(fig, use_container_width=True)
-```
-
-# --------------------------------------------------
-
-# AUDIENCE ANALYSIS
-
-# --------------------------------------------------
-
-elif section == "Audience Analysis":
-
-```
-col1, col2 = st.columns(2)
-
-with col1:
-
-    if "device" in df.columns:
-
-        device_data = (
-            df["device"]
-            .value_counts()
-            .reset_index()
-        )
-
-        device_data.columns = ["Device", "Count"]
-
-        fig = px.donut(
-            device_data,
-            names="Device",
-            values="Count"
-        )
-
+    with col1:
+        device = df["device"].value_counts().reset_index()
+        device.columns = ["device", "count"]
+        fig = px.pie(device, names="device", values="count")
         st.plotly_chart(fig, use_container_width=True)
 
-with col2:
-
-    if "region" in df.columns:
-
-        region_data = (
-            df["region"]
-            .value_counts()
-            .reset_index()
-        )
-
-        region_data.columns = ["Region", "Count"]
-
-        fig = px.bar(
-            region_data,
-            x="Region",
-            y="Count",
-            color="Region"
-        )
-
+    with col2:
+        region = df["region"].value_counts().reset_index()
+        region.columns = ["region", "count"]
+        fig = px.bar(region, x="region", y="count", color="region")
         st.plotly_chart(fig, use_container_width=True)
-```
 
-# --------------------------------------------------
+# =========================================================
+# TOUCHPOINT ANALYSIS
+# =========================================================
+elif page == "Touchpoint Analysis":
 
-# RECOMMENDATIONS
+    st.subheader("🔁 Touchpoint Distribution")
 
-# --------------------------------------------------
+    touch = df.groupby("touchpoint_number").size().reset_index(name="events")
 
-elif section == "Recommendations":
+    fig1 = px.line(touch, x="touchpoint_number", y="events", markers=True)
+    st.plotly_chart(fig1, use_container_width=True)
 
-```
-st.subheader("Strategic Recommendations")
+    fig2 = px.bar(touch, x="touchpoint_number", y="events")
+    st.plotly_chart(fig2, use_container_width=True)
 
-if "channel" in df.columns:
+# =========================================================
+# INSIGHTS
+# =========================================================
+elif page == "Insights":
 
-    best_channel = (
-        df.groupby("channel")["conversion_value"]
-        .sum()
-        .idxmax()
-    )
+    st.subheader("🧠 Business Insights")
 
-    st.success(
-        f"Top Performing Channel: {best_channel}"
-    )
+    avg_touch = df.groupby("journey_id")["touchpoint_number"].max().mean()
+    conv_rate = df["is_conversion"].sum() / df["journey_id"].nunique()
 
-if "campaign" in df.columns:
+    st.success(f"Average Touchpoints per Journey: {avg_touch:.2f}")
+    st.success(f"Journey Conversion Rate: {conv_rate:.2%}")
 
-    best_campaign = (
-        df.groupby("campaign")["conversion_value"]
-        .sum()
-        .idxmax()
-    )
-
-    st.success(
-        f"Highest Revenue Campaign: {best_campaign}"
-    )
-
-st.info(
-    "Focus marketing spend on top-performing channels and campaigns while optimizing lower-performing touchpoints."
-)
-```
+    st.info("Channels are dynamically filtered based on selection.")
