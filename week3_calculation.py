@@ -13,3 +13,6 @@ print("Total Revenue:", total_revenue)
 
 roas = totalrevenue / totalspend
 print("ROAS:", roas)
+
+attributed_revenue = df["conversion_value"].sum()
+print(attributed_revenue)
