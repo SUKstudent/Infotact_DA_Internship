@@ -16,3 +16,7 @@ print("ROAS:", roas)
 
 attributed_revenue = df["conversion_value"].sum()
 print(attributed_revenue)
+
+total_customers = df[df['is_conversion'] == 1]['user_id'].nunique()
+cac = total_spend / total_customers#Customer Acquisition Cost
+print("CAC:",round(cac,2))
