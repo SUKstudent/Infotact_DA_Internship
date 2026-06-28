@@ -18,8 +18,11 @@ attributed_revenue = df["conversion_value"].sum()
 print(attributed_revenue)
 
 total_customers = df[df['is_conversion'] == 1]['user_id'].nunique()
-cac = total_spend / total_customers#Customer Acquisition Cost
+cac = total_spend / total_customers #Customer Acquisition Cost
 print("CAC:",round(cac,2))
 
 total_regions = df['region'].nunique()
 print("Total Regions:", total_regions)
+
+total_touchpoints = df['touchpoint_number'].sum()
+print(total_touchpoints)
