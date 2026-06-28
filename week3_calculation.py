@@ -20,3 +20,6 @@ print(attributed_revenue)
 total_customers = df[df['is_conversion'] == 1]['user_id'].nunique()
 cac = total_spend / total_customers#Customer Acquisition Cost
 print("CAC:",round(cac,2))
+
+total_regions = df['region'].nunique()
+print("Total Regions:", total_regions)
