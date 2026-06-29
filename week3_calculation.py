@@ -26,3 +26,7 @@ print("Total Regions:", total_regions)
 
 total_touchpoints = df['touchpoint_number'].sum()
 print(total_touchpoints)
+
+total_count = df['total_touchpoints_in_journey'].count()
+print("Total Count:", total_count)
+print("Average Touch Points :",round(total_touchpoints/total_count,1))
