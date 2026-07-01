@@ -22,14 +22,14 @@
 ---
 
 ## 📅 Week 3 – Business Metrics using Python
-- Calculated Total Revenue and Total Ad Spend.
-- Calculated Customer Acquisition Cost (CAC).
-- Calculated Return on Ad Spend (ROAS).
-- Calculated Conversion Rate.
-- Calculated Average Touchpoints.
-- Analyzed Total Users, Total Journeys, Total Campaigns, and Total Regions.
-- Prepared business KPIs for Power BI dashboard development.
-
+- Calculated :
+     - Total Ad Spend
+     - Total Revenue
+     - ROAS
+     - CAC
+     - Total Regions
+     - Average Touchpoints
+ 
 ---
 # Month 1(Task deployment)
 https://multitouchattribution.streamlit.app/
