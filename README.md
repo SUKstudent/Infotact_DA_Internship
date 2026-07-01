@@ -29,7 +29,7 @@
      - CAC
      - Total Regions
      - Average Touchpoints
- 
+ - Created Star Schema
 ---
 # Month 1(Task deployment)
 https://multitouchattribution.streamlit.app/
