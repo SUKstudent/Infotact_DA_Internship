@@ -31,5 +31,8 @@
      - Average Touchpoints
  - Created Star Schema
 ---
+## Week 4 - Day 1
+Designed the initial Power BI dashboard layout and finalized the structure for KPI cards, slicers, and visualizations.
+
 # Month 1(Task deployment)
 https://multitouchattribution.streamlit.app/
