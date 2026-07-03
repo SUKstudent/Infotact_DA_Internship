@@ -31,7 +31,7 @@
      - Average Touchpoints
  - Created Star Schema
 ---
-## Week 4 - Day 1
+## Week 4 - Creating Dashboard and Report
 Designed the initial Power BI dashboard layout and finalized the structure for KPI cards, slicers, and visualizations.
 
 # Month 1(Task deployment)
