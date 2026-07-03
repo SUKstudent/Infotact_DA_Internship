@@ -1,6 +1,6 @@
 # Infotact Data Analytics Internship
 2 Months Data Analytics Infotact Internship 
-# 📝 Project Notes (Progress Till Week 3)
+# 📝 Project Notes
 
 ## 📅 Week 1 – Data Preparation & Exploratory Data Analysis (EDA)
 - Imported the marketing attribution dataset into Google Colab.
@@ -31,8 +31,11 @@
      - Average Touchpoints
  - Created Star Schema
 ---
-## Week 4 - Creating Dashboard and Report
-Designed the initial Power BI dashboard layout and finalized the structure for KPI cards, slicers, and visualizations.
+## Week 4 - Power BI Dashboard
+- Designed Power BI dashboard layout  
+- Built KPI cards, slicers, and interactive visuals  
+- Created marketing funnel, regional analysis, and channel insights  
+- Finalized dashboard structure for reporting
 
 # Month 1(Task deployment)
 https://multitouchattribution.streamlit.app/
