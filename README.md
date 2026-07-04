@@ -36,6 +36,8 @@
 - Built KPI cards, slicers, and interactive visuals  
 - Created marketing funnel, regional analysis, and channel insights  
 - Finalized dashboard structure for reporting
+### In Progress
+- Executive Summary Report
 
 # Month 1(Task deployment)
 https://multitouchattribution.streamlit.app/
