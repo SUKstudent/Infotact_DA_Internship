@@ -2,6 +2,7 @@
 2 Months Data Analytics Infotact Internship 
 # 📝 Project Notes
 
+# Month 1
 ## 📅 Week 1 – Data Preparation & Exploratory Data Analysis (EDA)
 - Imported the marketing attribution dataset into Google Colab.
 - Explored the dataset using Pandas.
@@ -40,3 +41,7 @@
 
 # Month 1(Task deployment)
 https://multitouchattribution.streamlit.app/
+
+# Month 2
+## 📅 Week 1 – Data Preparation & Exploratory Data Analysis (EDA)
+-Collected the dataset
