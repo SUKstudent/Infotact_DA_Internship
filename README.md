@@ -49,7 +49,7 @@ https://multitouchattribution.streamlit.app/
 ### Day 2
 - Imported required Python libraries.
 ### Day 3
-- Loaded the transactional dataset into Google Colab.
+- Loaded the transactional datasets into Google Colab.
 - Performed initial dataset exploration using head(), shape().
 ### Day 4
 - Checked missing values.
